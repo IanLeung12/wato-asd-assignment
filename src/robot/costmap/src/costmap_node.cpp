@@ -114,11 +114,10 @@ int main(int argc, char ** argv)
   return 0;
 }
 
-/* TEST MESSAGE
 void CostmapNode::publishMessage() {
   auto message = std_msgs::msg::String();
   message.data = "Hello, ROS 2!";
   RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", message.data.c_str());
   string_pub_->publish(message);
 }
-*/
+
