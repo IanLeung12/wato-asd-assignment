@@ -16,8 +16,8 @@ CostmapNode::CostmapNode() : Node("costmap"), costmap_(robot::CostmapCore(this->
 
   // Initialize costmap parameters
   resolution_ = 0.1;
-  width_ = 100;
-  height_ = 100;
+  width_ = 300;
+  height_ = 300;
   origin_x_ = -1*((width_ * resolution_)/2.0);
   origin_y_ = -1*((height_ * resolution_)/2.0);
   inflation_radius_ = 1.0; 
