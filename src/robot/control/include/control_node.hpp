@@ -7,6 +7,10 @@
 #include "nav_msgs/msg/path.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "geometry_msgs/msg/twist.hpp"
+#include "geometry_msgs/msg/pose_stamped.hpp"
+#include "geometry_msgs/msg/point.hpp"
+#include "geometry_msgs/msg/quaternion.hpp"
+#include <optional>
 
 class ControlNode : public rclcpp::Node {
   public:

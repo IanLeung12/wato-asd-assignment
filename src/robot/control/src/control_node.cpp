@@ -1,12 +1,12 @@
 #include "control_node.hpp"
 
 ControlNode::ControlNode(): Node("control"), control_(robot::ControlCore(this->get_logger())) {
-  lookahead_distance = 1.0
+  lookahead_distance = 1.0;
   goal_tolerance = 0.1;
-  linear_speed_ = 0.5
+  linear_speed_ = 0.5;
 
   path_sub_ = this->create_subscription<nav_msgs::msg::Path>(
-    "/path", 10,  [this](const nav_msgs::msg::Path::SharedPtr msg { current_path_ = msg;}));
+    "/path", 10,  [this](const nav_msgs::msg::Path::SharedPtr msg) { current_path_ = msg; });
 
   odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
     "/odom/filtered", 10, [this](const nav_msgs::msg::Odometry::SharedPtr msg) {
@@ -57,18 +57,18 @@ std::optional<geometry_msgs::msg::PoseStamped> ControlNode::findLookaheadPoint()
   }
 
   auto robot_pos = robot_odom_->pose.pose.position;
-  
-  for (size_t i = 0; i < current_path_->poses.size() - 1; ++i) {
-    double distance = computeDistance(current_path_->poses[i].pose.position, robot_pos);
+
+  for (const auto& pose : current_path_->poses) {
+    double distance = computeDistance(pose.pose.position, robot_pos);
     if (distance >= lookahead_distance) {
-      return current_path_->poses[i];
+      return pose;
     }
   }
 
-  return std::current_path_->poses.back();
+  return current_path_->poses.back();
 }
 
-geometry_msgs::msg::Twist computeVelocity(const geometry_msgs::msg::PoseStamped &point) {
+geometry_msgs::msg::Twist ControlNode::computeVelocity(const geometry_msgs::msg::PoseStamped &point) {
   geometry_msgs::msg::Twist cmd_vel;
 
   auto robot_pos = robot_odom_->pose.pose.position;
@@ -91,11 +91,11 @@ geometry_msgs::msg::Twist computeVelocity(const geometry_msgs::msg::PoseStamped 
   return cmd_vel; 
 }
 
-double computeDistance(const geometry_msgs::msg::Point &a, const geometry_msgs::msg::Point &b) {
+double ControlNode::computeDistance(const geometry_msgs::msg::Point &a, const geometry_msgs::msg::Point &b) {
   return std::hypot(b.x - a.x, b.y - a.y);
 }
 
-double extractYaw(const geometry_msgs::msg::Quaternion &quat) {
+double ControlNode::extractYaw(const geometry_msgs::msg::Quaternion &quat) {
   tf2::Quaternion q(quat.x, quat.y, quat.z, quat.w);
   double roll, pitch, yaw;
   tf2::Matrix3x3(q).getRPY(roll, pitch, yaw);
