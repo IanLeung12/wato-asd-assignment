@@ -6,7 +6,8 @@
 #include "geometry_msgs/msg/point_stamped.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "nav_msgs/msg/path.hpp"
-
+#include <vector>
+#include <unordered_map>
 #include "planner_core.hpp"
 
 // ------------------- Supporting Structures -------------------
@@ -73,6 +74,15 @@ class PlannerNode : public rclcpp::Node {
     void timerCallback();
     bool goalReached();
     void planPath();
+    CellIndex worldToMap(double wx, double wy, const nav_msgs::msg::OccupancyGrid& map);
+    geometry_msgs::msg::PoseStamped mapToWorld(const CellIndex& c, const nav_msgs::msg::OccupancyGrid& map);
+    bool inBounds(const CellIndex& c, const nav_msgs::msg::OccupancyGrid& map);
+    bool isFree(const CellIndex& c, const nav_msgs::msg::OccupancyGrid& map);
+    std::vector<CellIndex> getNeighbors(const CellIndex& c, const nav_msgs::msg::OccupancyGrid& map);
+    double heuristic(const CellIndex& a, const CellIndex& b);
+    
+    nav_msgs::msg::Path reconstructPath(std::unordered_map<CellIndex, CellIndex, CellIndexHash>& came_from,
+    CellIndex current,const nav_msgs::msg::OccupancyGrid& map);
 
     nav_msgs::msg::OccupancyGrid current_map_;
     geometry_msgs::msg::PointStamped goal_;
@@ -90,3 +100,4 @@ class PlannerNode : public rclcpp::Node {
 };
 
 #endif 
+
