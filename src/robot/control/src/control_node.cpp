@@ -78,7 +78,6 @@ geometry_msgs::msg::Twist ControlNode::computeVelocity(const geometry_msgs::msg:
   double dx = point_pos.x - robot_pos.x;
   double dy = point_pos.y - robot_pos.y;
 
-  double xp = std::cos(robot_yaw) * dx + std::sin(robot_yaw) * dy;
   double yp = -std::sin(robot_yaw) * dx + std::cos(robot_yaw) * dy;
 
   double curvature = (2 * yp) / (lookahead_distance * lookahead_distance);
@@ -95,11 +94,8 @@ double ControlNode::computeDistance(const geometry_msgs::msg::Point &a, const ge
   return std::hypot(b.x - a.x, b.y - a.y);
 }
 
-double ControlNode::extractYaw(const geometry_msgs::msg::Quaternion &quat) {
-  tf2::Quaternion q(quat.x, quat.y, quat.z, quat.w);
-  double roll, pitch, yaw;
-  tf2::Matrix3x3(q).getRPY(roll, pitch, yaw);
-  return yaw;
+double ControlNode::extractYaw(const geometry_msgs::msg::Quaternion &q) {
+  return std::atan2(2.0 * (q.w * q.z + q.x * q.y), 1.0 - 2.0 * (q.y * q.y + q.z * q.z));
 }
 
 int main(int argc, char ** argv)
