@@ -24,7 +24,7 @@ public:
         global_map_.info.origin.position.x = global_map_.info.width * global_map_.info.resolution / -2;
         global_map_.info.origin.position.y = global_map_.info.height * global_map_.info.resolution / -2;
         global_map_.info.origin.orientation.w = 1.0;
-        global_map_.data.resize(300 * 300, -1);
+        global_map_.data.resize(300 * 300, 0);
     }
  
 private:
@@ -53,10 +53,8 @@ private:
         double y = msg->pose.pose.position.y;
  
         // quaternion to yaw
-        geometry_msgs::msg::Quaternion quat = msg->pose.pose.orientation;
-        tf2::Quaternion tf_quat(quat.x, quat.y, quat.z, quat.w);
-        double roll, pitch;
-        tf2::Matrix3x3(tf_quat).getRPY(roll, pitch, last_yaw);
+        geometry_msgs::msg::Quaternion q = msg->pose.pose.orientation;
+        last_yaw = std::atan2(2.0 * (q.w * q.z + q.x * q.y), 1.0 - 2.0 * (q.y * q.y + q.z * q.z));
 
         // Compute distance traveled
         double distance = std::sqrt(std::pow(x - last_x, 2) + std::pow(y - last_y, 2));
@@ -90,23 +88,23 @@ private:
                 }
 
                 // convert costmap indices to local coordinates
-                double local_x = latest_costmap_.info.origin.position.x + cm_x * latest_costmap_.info.resolution;
-                double local_y = latest_costmap_.info.origin.position.y + cm_y * latest_costmap_.info.resolution;
+                double local_x = latest_costmap_.info.origin.position.x + (cm_x + 0.5) * latest_costmap_.info.resolution;
+                double local_y = latest_costmap_.info.origin.position.y + (cm_y + 0.5) * latest_costmap_.info.resolution;
 
                 // convert local coordinates to global coordinates
                 double world_x = std::cos(last_yaw) * local_x - std::sin(last_yaw) * local_y + last_x;
                 double world_y = std::sin(last_yaw) * local_x + std::cos(last_yaw) * local_y + last_y;
 
                 // convert global coordinates to global indices
-                int global_x = static_cast<int>((world_x - global_map_.info.origin.position.x) / global_map_.info.resolution);
-                int global_y = static_cast<int>((world_y - global_map_.info.origin.position.y) / global_map_.info.resolution);
+                int global_x = static_cast<int>(std::round((world_x - global_map_.info.origin.position.x) / global_map_.info.resolution));
+                int global_y = static_cast<int>(std::round((world_y - global_map_.info.origin.position.y) / global_map_.info.resolution));
 
                 // make sure within bounds
                 if (global_x >= 0 && global_x < static_cast<int>(global_map_.info.width) &&
                     global_y >= 0 && global_y < static_cast<int>(global_map_.info.height)) {
                     int global_index = global_y * global_map_.info.width + global_x;
 
-                    if (global_map_.data[global_index] == -1 || cost > global_map_.data[global_index]) {
+                    if (cost > global_map_.data[global_index]) {
                         global_map_.data[global_index] = cost;
                     }
                 }

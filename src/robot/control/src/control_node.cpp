@@ -1,7 +1,9 @@
 #include "control_node.hpp"
 
 ControlNode::ControlNode(): Node("control"), control_(robot::ControlCore(this->get_logger())) {
-git push
+  lookahead_distance = 1.0;
+  goal_tolerance = 0.1;
+  linear_speed_ = 0.5;
 
   path_sub_ = this->create_subscription<nav_msgs::msg::Path>(
     "/path", 10,  [this](const nav_msgs::msg::Path::SharedPtr msg) { current_path_ = msg; });
@@ -15,7 +17,6 @@ git push
 
   control_timer_ = this->create_wall_timer(
     std::chrono::milliseconds(100), [this]() { controlLoop(); });
-
 }
 
 void ControlNode::controlLoop() {
