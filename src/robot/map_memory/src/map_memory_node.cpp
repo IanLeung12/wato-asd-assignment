@@ -114,7 +114,7 @@ private:
  
     // Flags
     nav_msgs::msg::OccupancyGrid latest_costmap_;
-    bool should_update_map_ = false;
+    bool should_update_map_ = true; // update once on initialization
 };
 
 int main(int argc, char ** argv)
